@@ -1,0 +1,36 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 登录到Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 构建和推送Docker镜像
+        run: |
+          curl ipinfo.io
+          
+          cd 8.4
+          docker build -f Dockerfile.oracle -t ${{ secrets.DOCKER_USERNAME }}/mysql:8.4 .
+          docker push ${{ secrets.DOCKER_USERNAME }}/mysql:8.4
